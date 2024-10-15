@@ -9,10 +9,12 @@ type SignatureAlgorithm string
 const SignatureRSA SignatureAlgorithm = "RSA"
 const SignautreECDSA SignatureAlgorithm = "ECDSA"
 
+// IsSupportedAlgorithm checks whether agiven algorithm is supported by the signing suite.
 func IsSupportedAlgorithm(algorithm string) bool {
 	sigAlg := SignatureAlgorithm(algorithm)
 	switch sigAlg {
 	case SignatureRSA:
+		return true
 	case SignautreECDSA:
 		return true
 	}
