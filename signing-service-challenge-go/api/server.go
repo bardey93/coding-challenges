@@ -37,7 +37,7 @@ type Server struct {
 func NewServer(listenAddress string) *Server {
 	return &Server{
 		listenAddress: listenAddress,
-		storer:        persistence.InMemeoryStorer{},
+		storer:        persistence.InMemoryStorer{},
 		// TODO: add services / further dependencies here ...
 	}
 }
