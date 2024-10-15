@@ -29,17 +29,17 @@ func NewSignatureDevice(id uuid.UUID, label string, algorithm crypto.SignatureAl
 		return nil, fmt.Errorf("NewSigantureDevice | %w", err)
 	}
 	// init lastSignautre for first signing
-	lastSignature := make([]byte, base64.StdEncoding.EncodedLen(len(id)))
-	uid := []byte(id.String())
 
-	base64.StdEncoding.Encode(lastSignature, uid)
+	uid := []byte(id.String())
+	lastSignature := base64.StdEncoding.EncodeToString(uid)
+
 	return &SignatureDevice{
 		ID:        id,
 		Label:     label,
 		Algorithm: algorithm,
 		signer:    signer,
 
-		lastSignature: lastSignature,
+		lastSignature: []byte(lastSignature),
 	}, nil
 }
 

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/fiskaly/coding-challenges/signing-service-challenge/domain"
 	"github.com/fiskaly/coding-challenges/signing-service-challenge/persistence"
 )
 
@@ -12,11 +13,13 @@ type Response struct {
 	Data interface{} `json:"data"`
 }
 
+// SignatureRequest struct is the request payload for signature handlers
 type SignatureRequest struct {
 	ID   string `json:"id"`
 	Data string `json:"data"`
 }
 
+// SignatureResponse is the response struct for the signature handler
 type SignatureResponse struct {
 	SignedData string `json:"signed_data"`
 	Signature  string `json:"signature"`
@@ -37,7 +40,9 @@ type Server struct {
 func NewServer(listenAddress string) *Server {
 	return &Server{
 		listenAddress: listenAddress,
-		storer:        persistence.InMemoryStorer{},
+		storer: persistence.InMemoryStorer{
+			Devices: map[string]*domain.SignatureDevice{},
+		},
 		// TODO: add services / further dependencies here ...
 	}
 }
