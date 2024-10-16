@@ -105,7 +105,7 @@ func (s *Server) PostSignature(response http.ResponseWriter, request *http.Reque
 		return
 	}
 
-	signature, signedData, err := sd.Sign([]byte(payload.Data))
+	signature, signedData, err := sd.Sign(payload.Data)
 	if err != nil {
 		log.Printf("PostSignature sign | err: %s", err)
 		WriteErrorResponse(response, http.StatusInternalServerError, []string{
