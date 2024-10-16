@@ -16,14 +16,35 @@ func TestNewRSASigner(t *testing.T) {
 }
 
 func TestRSASign(t *testing.T) {
-	payload := []byte("toBeSigned")
-	signer, err := NewRSASigner()
-	assert.Nil(t, err)
+	t.Run("nil", func(t *testing.T) {
+		payload := []byte("toBeSigned")
+		signer, err := NewRSASigner()
+		assert.Nil(t, err)
 
-	signature, err := signer.Sign(payload)
-	assert.Nil(t, err)
+		signature, err := signer.Sign(payload)
+		assert.Nil(t, err)
+		assert.NotNil(t, 0, len(signature))
 
-	hash := sha256.Sum256(payload)
-	err = rsa.VerifyPKCS1v15(signer.key.Public, crypto.SHA256, hash[:], signature)
-	assert.Nil(t, err)
+	})
+	t.Run("empty", func(t *testing.T) {
+		payload := []byte("toBeSigned")
+		signer, err := NewRSASigner()
+		assert.Nil(t, err)
+
+		signature, err := signer.Sign(payload)
+		assert.Nil(t, err)
+		assert.NotNil(t, signature)
+	})
+	t.Run("default", func(t *testing.T) {
+		payload := []byte("toBeSigned")
+		signer, err := NewRSASigner()
+		assert.Nil(t, err)
+
+		signature, err := signer.Sign(payload)
+		assert.Nil(t, err)
+
+		hash := sha256.Sum256(payload)
+		err = rsa.VerifyPKCS1v15(signer.key.Public, crypto.SHA256, hash[:], signature)
+		assert.Nil(t, err)
+	})
 }

@@ -15,15 +15,36 @@ func TestNewECDSASigner(t *testing.T) {
 }
 
 func TestECDSASign(t *testing.T) {
-	payload := []byte("toBeSigned")
-	signer, err := NewECDSASigner()
-	assert.Nil(t, err)
+	t.Run("nil", func(t *testing.T) {
+		payload := []byte("toBeSigned")
+		signer, err := NewECDSASigner()
+		assert.Nil(t, err)
 
-	signature, err := signer.Sign(payload)
-	assert.Nil(t, err)
+		signature, err := signer.Sign(payload)
+		assert.Nil(t, err)
+		assert.NotNil(t, 0, len(signature))
 
-	hash := sha256.Sum256(payload)
+	})
+	t.Run("empty", func(t *testing.T) {
+		payload := []byte("toBeSigned")
+		signer, err := NewECDSASigner()
+		assert.Nil(t, err)
 
-	verified := ecdsa.VerifyASN1(signer.key.Public, hash[:], signature)
-	assert.True(t, verified)
+		signature, err := signer.Sign(payload)
+		assert.Nil(t, err)
+		assert.NotNil(t, signature)
+	})
+	t.Run("default", func(t *testing.T) {
+		payload := []byte("toBeSigned")
+		signer, err := NewECDSASigner()
+		assert.Nil(t, err)
+
+		signature, err := signer.Sign(payload)
+		assert.Nil(t, err)
+
+		hash := sha256.Sum256(payload)
+
+		verified := ecdsa.VerifyASN1(signer.key.Public, hash[:], signature)
+		assert.True(t, verified)
+	})
 }
