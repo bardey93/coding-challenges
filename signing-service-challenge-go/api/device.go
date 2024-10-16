@@ -19,7 +19,7 @@ func (s *Server) GetSignatureDevices(response http.ResponseWriter, request *http
 		return
 	}
 
-	devices, err := s.storer.ReadSignatureDevices()
+	devices, err := s.Storer.ReadSignatureDevices()
 	if err != nil {
 		log.Printf("GetSignatureDevices read devices | %s", err)
 		WriteErrorResponse(response, http.StatusInternalServerError, []string{http.StatusText(http.StatusInternalServerError)})
@@ -66,7 +66,7 @@ func (s *Server) PostSignatureDevice(response http.ResponseWriter, request *http
 		return
 	}
 
-	sd, err = s.storer.CreateSignatureDevice(sd)
+	sd, err = s.Storer.CreateSignatureDevice(sd)
 	if err != nil {
 		log.Printf("PostSignatureDevice store signatureDevice | err: %s", err)
 		WriteErrorResponse(response, http.StatusInternalServerError, []string{
@@ -96,7 +96,7 @@ func (s *Server) PostSignature(response http.ResponseWriter, request *http.Reque
 		return
 	}
 
-	sd, err := s.storer.ReadSignatureDevice(payload.ID)
+	sd, err := s.Storer.ReadSignatureDevice(payload.ID)
 	if err != nil {
 		log.Printf("PostSignature read device | err: %s", err)
 		WriteErrorResponse(response, http.StatusInternalServerError, []string{
