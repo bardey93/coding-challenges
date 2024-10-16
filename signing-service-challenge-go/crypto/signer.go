@@ -24,6 +24,7 @@ func IsSupportedAlgorithm(algorithm string) bool {
 // Signer defines a contract for different types of signing implementations.
 type Signer interface {
 	Sign(dataToBeSigned []byte) ([]byte, error)
+	Verify(dataToBeSigned []byte, signature []byte) bool
 }
 
 // NewSigner returns an implementation of Signer based on the provided algorithm

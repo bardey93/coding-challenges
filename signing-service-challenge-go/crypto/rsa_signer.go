@@ -34,3 +34,9 @@ func (s RSASigner) Sign(dataTobeSigned []byte) ([]byte, error) {
 	}
 	return signature, nil
 }
+
+func (s RSASigner) Verify(dataToBeSigned []byte, signature []byte) bool {
+	hash := sha256.Sum256(dataToBeSigned)
+	err := rsa.VerifyPKCS1v15(s.key.Public, crypto.SHA256, hash[:], signature)
+	return err == nil
+}

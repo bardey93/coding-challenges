@@ -33,3 +33,8 @@ func (s ECDSASigner) Sign(dataTobeSigned []byte) ([]byte, error) {
 	}
 	return signature, nil
 }
+
+func (s ECDSASigner) Verify(dataToBeSigned []byte, signature []byte) bool {
+	hash := sha256.Sum256(dataToBeSigned)
+	return ecdsa.VerifyASN1(s.key.Public, hash[:], signature)
+}

@@ -1,8 +1,6 @@
 package crypto
 
 import (
-	"crypto/ecdsa"
-	"crypto/sha256"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -34,7 +32,7 @@ func TestECDSASign(t *testing.T) {
 		assert.Nil(t, err)
 		assert.NotNil(t, signature)
 	})
-	t.Run("default", func(t *testing.T) {
+	t.Run("default sign and verify", func(t *testing.T) {
 		payload := []byte("toBeSigned")
 		signer, err := NewECDSASigner()
 		assert.Nil(t, err)
@@ -42,9 +40,7 @@ func TestECDSASign(t *testing.T) {
 		signature, err := signer.Sign(payload)
 		assert.Nil(t, err)
 
-		hash := sha256.Sum256(payload)
-
-		verified := ecdsa.VerifyASN1(signer.key.Public, hash[:], signature)
+		verified := signer.Verify(payload, signature)
 		assert.True(t, verified)
 	})
 }

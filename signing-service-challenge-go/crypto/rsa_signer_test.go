@@ -1,9 +1,6 @@
 package crypto
 
 import (
-	"crypto"
-	"crypto/rsa"
-	"crypto/sha256"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -35,7 +32,7 @@ func TestRSASign(t *testing.T) {
 		assert.Nil(t, err)
 		assert.NotNil(t, signature)
 	})
-	t.Run("default", func(t *testing.T) {
+	t.Run("default sign and verify", func(t *testing.T) {
 		payload := []byte("toBeSigned")
 		signer, err := NewRSASigner()
 		assert.Nil(t, err)
@@ -43,8 +40,7 @@ func TestRSASign(t *testing.T) {
 		signature, err := signer.Sign(payload)
 		assert.Nil(t, err)
 
-		hash := sha256.Sum256(payload)
-		err = rsa.VerifyPKCS1v15(signer.key.Public, crypto.SHA256, hash[:], signature)
-		assert.Nil(t, err)
+		verified := signer.Verify(payload, signature)
+		assert.True(t, verified)
 	})
 }
