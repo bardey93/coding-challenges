@@ -3,7 +3,6 @@ package domain
 import (
 	"encoding/base64"
 	"fmt"
-	"strconv"
 	"sync"
 
 	"github.com/fiskaly/coding-challenges/signing-service-challenge/crypto"
@@ -19,11 +18,15 @@ type SignatureDevice struct {
 	signer           crypto.Signer
 	signatureCounter int
 	mu               sync.Mutex
-	lastSignature    []byte
+	lastSignature    string
 }
 
 // NewSignatureDevice initializes a SignatureDevice with the provided data a generated key pair for the given signature algorithm
 func NewSignatureDevice(id uuid.UUID, label string, algorithm crypto.SignatureAlgorithm) (*SignatureDevice, error) {
+	if id == uuid.Nil {
+		return nil, fmt.Errorf("NewSignatureDevice | invalid uuid")
+	}
+
 	signer, err := crypto.NewSigner(algorithm)
 	if err != nil {
 		return nil, fmt.Errorf("NewSigantureDevice | %w", err)
@@ -39,42 +42,29 @@ func NewSignatureDevice(id uuid.UUID, label string, algorithm crypto.SignatureAl
 		Algorithm: algorithm,
 		signer:    signer,
 
-		lastSignature: []byte(lastSignature),
+		lastSignature: lastSignature,
 	}, nil
 }
 
 // Sign creates a digital signature for the provided data. The provided dataToBeSigned will be prepended by the
 // signature counter and suffixed by the last signature, each divided witha '_' character
-func (sd *SignatureDevice) Sign(dataToBeSigned []byte) (string, string, error) {
+func (sd *SignatureDevice) Sign(dataToBeSigned string) (string, string, error) {
 	sd.mu.Lock() // prevent sigCounter from being corrupted
 	defer sd.mu.Unlock()
 	secDataToBeSigned := prepareSecDataToBeSigned(dataToBeSigned, sd.lastSignature, sd.signatureCounter)
 
-	rawSig, err := sd.signer.Sign(secDataToBeSigned)
+	rawSig, err := sd.signer.Sign([]byte(secDataToBeSigned))
 	if err != nil {
 		return "", "", fmt.Errorf("SignatureDevice Sign | id: %s | err: %w", sd.ID, err)
 	}
-	encodedSig := make([]byte, base64.StdEncoding.EncodedLen(len(rawSig)))
-	base64.StdEncoding.Encode(encodedSig, rawSig)
+	encodedSignature := base64.StdEncoding.EncodeToString(rawSig)
+	sd.lastSignature = encodedSignature
 
 	sd.signatureCounter++
-	sd.lastSignature = encodedSig
 	// mux unlocks here
-	return string(encodedSig), string(secDataToBeSigned), nil
+	return encodedSignature, secDataToBeSigned, nil
 }
 
-func prepareSecDataToBeSigned(dataToBeSigned []byte, lastSignature []byte, signatureCounter int) []byte {
-	sigCounter := []byte(strconv.Itoa(signatureCounter))
-
-	// allocate for efficiency
-	lenSecData := len(dataToBeSigned) + len(lastSignature) + len(sigCounter) + 2
-	secDataToBeSigned := make([]byte, lenSecData)
-
-	secDataToBeSigned = append(secDataToBeSigned, sigCounter...)
-	secDataToBeSigned = append(secDataToBeSigned, []byte("_")...)
-	secDataToBeSigned = append(secDataToBeSigned, dataToBeSigned...)
-	secDataToBeSigned = append(secDataToBeSigned, []byte("_")...)
-	secDataToBeSigned = append(secDataToBeSigned, lastSignature...)
-
-	return secDataToBeSigned
+func prepareSecDataToBeSigned(dataToBeSigned string, lastSignature string, signatureCounter int) string {
+	return fmt.Sprintf("%d_%s_%s", signatureCounter, dataToBeSigned, lastSignature)
 }
